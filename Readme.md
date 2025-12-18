@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Артур Ибрагимов](https://up.htmlacademy.ru/ecmascript-individual/2/user/2101513).
-* Наставник: [Александр Сударев](https://htmlacademy.ru/profile/id1152185).
+* Наставник: `Неизвестно`.
 
 ---
 
