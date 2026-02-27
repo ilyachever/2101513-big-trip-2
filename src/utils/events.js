@@ -4,7 +4,6 @@ import minMax from 'dayjs/plugin/minMax.js';
 import {
   DATE_FORMAT,
   HOURS_IN_DAY,
-  MILLISECONDS_IN_MINUTES,
   SECONDS_IN_MINUTES,
   DURATIONS,
 } from '../constants.js';
@@ -27,22 +26,20 @@ const getDate = ({next}) => {
   return randomDate;
 };
 
+
 function humanizeTaskDueDate(date, format) {
   return date ? dayjs(date).format(format) : '';
 }
 
-function getDifferenceInTime(start, end) {
-  const difference = dayjs(end).diff(start) / MILLISECONDS_IN_MINUTES;
+function getDifferenceInTime(start, dateTo) {
+  const difference = dayjs(dateTo).diff(start) / SECONDS_IN_MINUTES;
 
-  switch (difference) {
-    case difference < SECONDS_IN_MINUTES:
-      return dayjs(difference).format(DATE_FORMAT.MINUTES_WITH_POSTFIX);
-
-    case difference > SECONDS_IN_MINUTES && difference < SECONDS_IN_MINUTES * HOURS_IN_DAY:
-      return dayjs(difference).format(DATE_FORMAT.HOUR_MINUTES_WITH_POSTFIX);
-
-    default:
-      return dayjs(difference).format(DATE_FORMAT.DAY_HOUR_MINUTES_WITH_POSTFIX);
+  if (difference < SECONDS_IN_MINUTES) {
+    return dayjs(difference).format(DATE_FORMAT.MINUTES_WITH_POSTFIX);
+  } else if (difference > SECONDS_IN_MINUTES && difference < SECONDS_IN_MINUTES * HOURS_IN_DAY) {
+    return dayjs(difference).format(DATE_FORMAT.HOUR_MINUTES_WITH_POSTFIX);
+  } else {
+    return dayjs(difference).format(DATE_FORMAT.DAY_HOUR_MINUTES_WITH_POSTFIX);
   }
 }
 

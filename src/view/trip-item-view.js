@@ -15,6 +15,7 @@ function createOfferTemplate(offers) {
 function createTripItemTemplate(destination, eventPoint, offers) {
   const {type, basePrice, dateFrom, dateTo, isFavorite,} = eventPoint;
   const eventOffers = offers.filter((offer) => eventPoint.offers.includes(offer.id));
+
   return (
     `<li class="trip-events__item">
         <div class="event">
