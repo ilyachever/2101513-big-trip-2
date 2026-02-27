@@ -2,7 +2,7 @@ import {render, remove} from '../framework/render.js';
 import EmptyEventPointBoard from '../view/empty-event-points-list-view.js';
 import TripListView from '../view/trip-list-view.js';
 import PointPresenter from './point-presenter.js';
-import {SORT_TYPES, TIME_LIMIT, UPDATE_TYPE, USER_ACTION} from '../constants.js';
+import {FILTERS_TYPE, SORT_TYPES, TIME_LIMIT, UPDATE_TYPE, USER_ACTION} from '../constants.js';
 import SortPresenter from './sort-presenter.js';
 import {sorting} from '../utils/sort.js';
 import {filter} from '../utils/filter.js';
@@ -67,6 +67,7 @@ export default class PointsPresenter {
       this.#renderEmptyList();
       return;
     }
+
     this.#addPointButtonPresenter.enabledButton();
     this.#renderSort();
     this.#renderTripList();
@@ -89,6 +90,7 @@ export default class PointsPresenter {
   #clearPoints = () => {
     this.#pointsPresenter.forEach((presenter) => presenter.destroy());
     this.#pointsPresenter.clear();
+    this.#addPointPresenter.destroy();
   };
 
   #modelEventHandler = (updateType, data) => {
@@ -163,6 +165,7 @@ export default class PointsPresenter {
 
   #handleModeChange = () => {
     this.#pointsPresenter.forEach((presenter) => presenter.resetView());
+    this.#addPointPresenter.destroy();
   };
 
   #renderPoints() {
@@ -181,6 +184,8 @@ export default class PointsPresenter {
   addPointButtonClickHandler = () => {
     this.#isCreating = true;
     this.#addPointButtonPresenter.disabledButton();
+    this.#filtersModel.set(UPDATE_TYPE.MAJOR, FILTERS_TYPE.EVERYTHING);
+    this.#currentSortType = SORT_TYPES.DAY;
     this.#addPointPresenter.init();
   };
 

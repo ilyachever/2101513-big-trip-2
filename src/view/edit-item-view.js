@@ -4,10 +4,20 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-function rollUpTemplate() {
-  return `<button class="event__rollup-btn" type="button">
-            <span class="visually-hidden">Open event</span>
-          </button>`;
+function createButtonTemplate(isCreating, isDisabled, isDeleting) {
+  if (isCreating) {
+    return `
+    <button class="event__reset-btn" type="reset">Cancel</button>
+  `;
+  }
+  return `
+    <button class="event__reset-btn" ${isDisabled ? 'disabled' : ''} type="reset">
+        ${isDeleting ? 'Deleting...' : 'Delete'}
+    </button>
+    <button class="event__rollup-btn" type="button">
+        <span class="visually-hidden">Open event</span>
+    </button>
+  `;
 }
 
 function createDestinationOptionTemplate(destinations) {
@@ -94,7 +104,7 @@ function createDestinationTemplate(destination) {
 }
 
 function createEditItemTemplate({state, eventPointDestinations, eventPointOffers, editorMode}) {
-  const {basePrice, dateFrom, dateTo, type, id, destination} = state;
+  const {basePrice, dateFrom, dateTo, type, id, destination, isDisabled, isSaving, isDeleting} = state;
   const isCreating = editorMode === EDIT_TYPE.CREATING;
   const selectedDestination = eventPointDestinations.find((item) => item.id === destination);
   const currentEventPointOffers = eventPointOffers.find((offer) => offer.type === type);
@@ -140,9 +150,8 @@ function createEditItemTemplate({state, eventPointDestinations, eventPointOffers
               </label>
               <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
             </div>
-            <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-            <button class="event__reset-btn" type="reset">${isCreating ? 'Cancel' : 'Delete'}</button>
-            ${isCreating ? '' : rollUpTemplate()}
+            <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Saving...' : 'Save'}</button>
+            ${createButtonTemplate(isCreating, isDisabled, isDeleting)}
           </header>
           <section class="event__details">
             ${createOfferListTemplate(currentEventPointOffers.offers, state.offers)}
@@ -163,7 +172,17 @@ export default class EditItemView extends AbstractStatefulView {
   #datePickerTo = null;
   #editorMode = null;
 
-  constructor({destinations, eventPoint = POINT_EMPTY, offers, onCloseClick, onSaveEdit, onDeleteClick, editorMode = EDIT_TYPE.EDITING}) {
+  constructor(
+    {
+      destinations,
+      eventPoint = POINT_EMPTY,
+      offers,
+      onCloseClick,
+      onSaveEdit,
+      onDeleteClick,
+      editorMode = EDIT_TYPE.EDITING
+    }
+  ) {
     super();
     this.#destinations = destinations;
     this.#offers = offers;
