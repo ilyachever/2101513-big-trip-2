@@ -6,10 +6,33 @@ const MILLISECONDS_IN_MINUTES = 60000;
 const SECONDS_IN_MINUTES = 60;
 const HOURS_IN_DAY = 12;
 const MONTH_COUNT = 12;
-const FILTERS_TYPE = ['everything', 'future', 'present', 'past'];
-const DEFAULT_FILTER = FILTERS_TYPE[0];
-const SORT_TYPE = ['day', 'event', 'time', 'price', 'offers'];
-const DEFAULT_SORT = SORT_TYPE[0];
+const SORT_TYPES = [
+  {
+    type: 'day',
+    isDisabled: false,
+    isChecked: true,
+  },
+  {
+    type: 'event',
+    isDisabled: false,
+    isChecked: false,
+  },
+  {
+    type: 'time',
+    isDisabled: false,
+    isChecked: false,
+  },
+  {
+    type: 'price',
+    isDisabled: false,
+    isChecked: false,
+  },
+  {
+    type: 'offers',
+    isDisabled: true,
+    isChecked: false,
+  }
+];
 const EVENTS_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 const DATE_FORMAT = {
   DAY_MONTH: 'D MMM',
@@ -52,6 +75,13 @@ const OFFERS_TITLE = [
   'Offer title 6',
 ];
 
+const FILTERS_TYPE = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past'
+};
+
 export {
   START_ID_COUNTER,
   DESCRIPTIONS,
@@ -65,10 +95,8 @@ export {
   MILLISECONDS_IN_MINUTES,
   SECONDS_IN_MINUTES,
   HOURS_IN_DAY,
-  SORT_TYPE,
-  DEFAULT_SORT,
+  SORT_TYPES,
   FILTERS_TYPE,
-  DEFAULT_FILTER,
   MONTH_COUNT,
   DURATIONS,
   OFFER_COUNT
