@@ -1,6 +1,6 @@
 import TripInfoPresenter from './presenter/trip-info-presenter.js';
 import PointsPresenter from './presenter/points-presenter.js';
-import DestinationModel from './model/destintaion-model.js';
+import DestinationModel from './model/destination-model.js';
 import EventPointsModel from './model/event-points-model.js';
 import OffersModel from './model/offers-model.js';
 import FilterPresenter from './presenter/filter-presenter.js';
