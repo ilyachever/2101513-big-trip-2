@@ -1,21 +1,48 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import {getTripFullCost, getTripPeriod, getTripRoute} from '../utils/common.js';
 
-function createHeaderTripInfoTemplate() {
+function createHeaderTripInfoTemplate({route, duration, cost, isEmpty}) {
   return (
-    `<section class="trip-main__trip-info  trip-info">
+    isEmpty ?
+      `<section class="trip-main__trip-info  trip-info">
       <div class="trip-info__main">
-        <h1 class="trip-info__title">Amsterdam &mdash; Chamonix &mdash; Geneva</h1>
-        <p class="trip-info__dates">18&nbsp;&mdash;&nbsp;20 Mar</p>
+        <h1 class="trip-info__title">Loading...</h1>
+        <p class="trip-info__dates">Loading...</p>
       </div>
       <p class="trip-info__cost">
-        Total: &euro;&nbsp;<span class="trip-info__cost-value">1230</span>
+        Total: &euro;&nbsp;<span class="trip-info__cost-value">0</span>
+      </p>
+    </section>` :
+      `<section class="trip-main__trip-info  trip-info">
+      <div class="trip-info__main">
+        <h1 class="trip-info__title">${route}</h1>
+        <p class="trip-info__dates">${duration}</p>
+      </div>
+      <p class="trip-info__cost">
+        Total: &euro;&nbsp;<span class="trip-info__cost-value">${cost}</span>
       </p>
     </section>`
   );
 }
 
-export default class HeaderTripInfoView extends AbstractView{
+export default class HeaderTripInfoView extends AbstractView {
+  #eventPoints = [];
+  #destinations = [];
+  #offers = [];
+
+  constructor({destinations, offers, eventPoints}) {
+    super();
+    this.#eventPoints = eventPoints;
+    this.#destinations = destinations;
+    this.#offers = offers;
+  }
+
   get template() {
-    return createHeaderTripInfoTemplate();
+    return createHeaderTripInfoTemplate({
+      isEmpty: this.#eventPoints.length === 0,
+      route: getTripRoute(this.#eventPoints, this.#destinations),
+      duration: getTripPeriod(this.#eventPoints),
+      cost: getTripFullCost(this.#eventPoints, this.#offers),
+    });
   }
 }
