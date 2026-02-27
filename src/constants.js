@@ -32,8 +32,8 @@ const CITIES = [
   'Yoshkar-Ola',
   'Saint Petersburg',
   'Kirov',
-  'Saratov',
-  'New-York'
+  'Kazan',
+  'Paris'
 ];
 
 const OFFER_COUNT = {
@@ -57,9 +57,36 @@ const FILTERS_TYPE = {
   PAST: 'past'
 };
 
+const USER_ACTION = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  DELETE_POINT: 'DELETE_POINT',
+  CREATE_POINT: 'CREATE_POINT',
+};
+
+const UPDATE_TYPE = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
 const MODE = {
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
+};
+
+const EDIT_TYPE = {
+  EDITING: 'EDITING',
+  CREATING: 'CREATING',
+};
+
+const POINT_EMPTY = {
+  basePrice: 0,
+  dateFrom: null,
+  dateTo: null,
+  destination: null,
+  isFavorite: false,
+  offer: null,
+  type: EVENTS_TYPES[0],
 };
 
 const SORT_TYPES = {
@@ -76,6 +103,13 @@ const ENABLED_SORT_TYPES = {
   [SORT_TYPES.TIME]: true,
   [SORT_TYPES.PRICE]: true,
   [SORT_TYPES.OFFER]: false,
+};
+
+const EMPTY_LIST_MESSAGE = {
+  EVERYTHING: 'Click New Event to create your first point',
+  FUTURE: 'There are no future events now',
+  PRESENT: 'There are no present events now',
+  PAST: 'There are no past events now'
 };
 
 export {
@@ -96,5 +130,10 @@ export {
   OFFER_COUNT,
   MODE,
   SORT_TYPES,
-  ENABLED_SORT_TYPES
+  ENABLED_SORT_TYPES,
+  USER_ACTION,
+  UPDATE_TYPE,
+  EMPTY_LIST_MESSAGE,
+  EDIT_TYPE,
+  POINT_EMPTY
 };

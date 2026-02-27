@@ -1,7 +1,8 @@
+import {getDifferenceInTime} from './events.js';
+
 function getRandomArrayElement(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
-
 
 function getRandomNumber(number) {
   const randomNumber = Math.floor(Math.random() * number) + 1;
@@ -19,10 +20,15 @@ const getRandomIntFromDuration = (min, max) => Math.floor(Math.random() * (max -
 
 const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
 
+const isMinorChange = (pointA, pointB) => pointA.dateFrom !== pointB.dateFrom
+    || pointA.basePrice !== pointB.basePrice
+    || getDifferenceInTime(pointA.dateFrom, pointA.dateTo) !== getDifferenceInTime(pointB.dateFrom, pointB.dateTo);
+
 export {
   getRandomArrayElement,
   incrementCounter,
   getRandomNumber,
   getRandomIntFromDuration,
-  updateItem
+  updateItem,
+  isMinorChange
 };
