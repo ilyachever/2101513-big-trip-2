@@ -1,46 +1,98 @@
-import {render} from '../render.js';
+import {render, replace} from '../framework/render.js';
 import ListSortView from '../view/list-sort-view.js';
 import TripListView from '../view/trip-list-view.js';
 import TripItemView from '../view/trip-item-view.js';
-import AddItemView from '../view/add-item-view.js';
 import EditItemView from '../view/edit-item-view.js';
+import EmptyEventPointBoard from '../view/no-event-points-view.js';
 
 export default class MainPresenter {
-  sortComponent = new ListSortView();
-  tripListComponent = new TripListView();
+  #tripContainer = null;
+  #destinationModel = null;
+  #eventPointsModel = null;
+  #offersModel = null;
+  #sortComponent = new ListSortView();
+  #tripListComponent = new TripListView();
+  #eventPoints = [];
+  #destinations = [];
 
   constructor({tripContainer, destinationModel, eventPointsModel, offersModel}) {
-    this.tripContainer = tripContainer;
-    this.destinationModel = destinationModel;
-    this.eventPointsModel = eventPointsModel;
-    this.offersModel = offersModel;
+    this.#tripContainer = tripContainer;
+    this.#destinationModel = destinationModel;
+    this.#eventPointsModel = eventPointsModel;
+    this.#offersModel = offersModel;
+    this.#eventPoints = this.#eventPointsModel.get();
+    this.offers = this.#offersModel.get();
+    this.#destinations = this.#destinationModel.get();
   }
 
   init() {
-    this.eventArray = this.eventPointsModel.get();
-    this.offersArray = this.offersModel.get();
-    this.destinationArray = this.destinationModel.get();
+    render(this.#sortComponent, this.#tripContainer);
+    render(this.#tripListComponent, this.#tripContainer);
 
-    render(this.sortComponent, this.tripContainer);
-    render(this.tripListComponent, this.tripContainer);
-    render(
-      new EditItemView({
-        destinations: this.destinationModel.get(),
-        eventPoints: this.eventArray[0],
-        selectedOffers: this.offersModel.getByType(this.eventArray[0].type, this.eventArray[0].offers),
-        selectedDestination: this.destinationModel.getById(this.eventArray[0].destination),
-        offers: this.offersModel.getByType(this.eventArray[0].type, this.eventArray[0].offers),
-      }), this.tripListComponent.getElement());
-    for (let i = 0; i < this.offersArray.length; i++) {
-      const destination = this.destinationModel.getById(this.eventArray[i].destination);
-      render(
-        new TripItemView({
-          destination,
-          eventPoints: this.eventArray[i],
-          offersModel: this.offersArray[i],
-        }), this.tripListComponent.getElement(),
-      );
+    if (!this.#eventPoints.length) {
+      render(new EmptyEventPointBoard(), this.#tripContainer);
+
+      return;
     }
-    render(new AddItemView(), this.tripListComponent.getElement());
+
+    this.#eventPoints.forEach((eventPoint) => {
+      const destination = this.#destinationModel.getById(eventPoint.destination);
+      this.#renderEventPoint(this.#destinations, destination, eventPoint, this.#offersModel.getByType(eventPoint.type));
+    });
+  }
+
+  #renderEventPoint(destinations, destination, eventPoint, offers) {
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceEditFormToPoint();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+    const eventPointComponent = new TripItemView({
+      destination,
+      eventPoint,
+      offers,
+      onEditClick: () => {
+        editPointHandler();
+        document.addEventListener('keydown', escKeyDownHandler);
+      }
+    });
+    const eventEditPointComponent = new EditItemView({
+      destinations,
+      destination,
+      eventPoint,
+      offers,
+      onCloseClick: () => {
+        editPointCloseHandler();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      },
+      onSaveEdit: () => {
+        editPointSubmitHandler();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    });
+
+    function replacePointToEditForm() {
+      replace(eventEditPointComponent, eventPointComponent);
+    }
+
+    function replaceEditFormToPoint() {
+      replace(eventPointComponent, eventEditPointComponent);
+    }
+
+    function editPointHandler() {
+      replacePointToEditForm();
+    }
+
+    function editPointCloseHandler() {
+      replaceEditFormToPoint();
+    }
+
+    function editPointSubmitHandler() {
+      replaceEditFormToPoint();
+    }
+
+    render(eventPointComponent, this.#tripListComponent.element);
   }
 }

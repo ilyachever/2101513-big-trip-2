@@ -1,6 +1,4 @@
-const MAX_EVENT_COUNT = 3;
 const START_ID_COUNTER = 1;
-const START_CITY_COUNTER = 0;
 const MAX_IMAGES_COUNT = 5;
 const MAX_PRICE_VALUE = 200;
 const MAX_PRICE_OFFER = 40;
@@ -22,6 +20,11 @@ const DATE_FORMAT = {
   HOUR_MINUTES_WITH_POSTFIX: 'HH[H] mm[M]',
   DAY_HOUR_MINUTES_WITH_POSTFIX: 'DD[D] HH[H] mm[M]'
 };
+const DURATIONS = {
+  HOUR: 5,
+  DAY: 3,
+  MINUTE: 59
+};
 const DESCRIPTIONS = [
   'This is a first place',
   'This is a second place',
@@ -35,14 +38,10 @@ const CITIES = [
   'Kirov',
 ];
 
-const OFFERS = [
-  'first offer',
-  'second offer',
-  'third offer',
-  'fourth offer',
-  'fifth offer',
-  'sixth offer',
-];
+const OFFER_COUNT = {
+  MIN: 0,
+  MAX: 4
+};
 
 const OFFERS_TITLE = [
   'Offer title 1',
@@ -54,13 +53,11 @@ const OFFERS_TITLE = [
 ];
 
 export {
-  MAX_EVENT_COUNT,
   START_ID_COUNTER,
   DESCRIPTIONS,
   CITIES,
   MAX_IMAGES_COUNT,
   EVENTS_TYPES,
-  OFFERS,
   OFFERS_TITLE,
   MAX_PRICE_VALUE,
   MAX_PRICE_OFFER,
@@ -73,5 +70,6 @@ export {
   FILTERS_TYPE,
   DEFAULT_FILTER,
   MONTH_COUNT,
-  START_CITY_COUNTER
+  DURATIONS,
+  OFFER_COUNT
 };

@@ -1,10 +1,7 @@
-import {getDestinations} from '../mock/destination.js';
-
 export default class DestinationModel {
   #destinations = [];
-
-  constructor() {
-    this.#destinations = getDestinations();
+  constructor(service) {
+    this.#destinations = service.getDestinations();
   }
 
   get() {

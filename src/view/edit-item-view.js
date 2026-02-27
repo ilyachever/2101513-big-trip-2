@@ -1,25 +1,21 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {DATE_FORMAT, EVENTS_TYPES} from '../constants.js';
-import {humanizeTaskDueDate, toUpperCaseFirstSign} from '../utils.js';
+import {humanizeTaskDueDate, toUpperCaseFirstSign} from '../utils/events.js';
 
-function createEventTypeTemplate(type, checkedType, id) {
-  const isChecked = checkedType === type ? 'checked' : false;
-
-  return (
+function createEventTypeTemplate(eventTypes, currentType) {
+  return eventTypes.map((type) => (
     `<div class="event__type-item">
-      <input id="event-type-${type}-${id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${isChecked}>
-      <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-${id}">${toUpperCaseFirstSign(type)}</label>
+      <input id="event-type-${type}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${type === currentType ? 'checked' : ''}>
+      <label class="event__type-label  event__type-label--${type}" for="event-type-${type}">${toUpperCaseFirstSign(type)}</label>
     </div>`
-  );
+  )).join('');
 }
 
-function createOfferTemplate(offer, checkedOffers) {
+function createOfferTemplate(offer) {
   const {id, title, price} = offer;
-  const isChecked = checkedOffers.includes(id) ? 'checked' : false;
-
   return (
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id=${id} type="checkbox" name=${id} ${isChecked}>
+      <input class="event__offer-checkbox  visually-hidden" id=${id} type="checkbox" name=${id} checked>
       <label class="event__offer-label" for=${id}>
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
@@ -29,14 +25,14 @@ function createOfferTemplate(offer, checkedOffers) {
   );
 }
 
-function createOfferListTemplate({offers}, checkedOffers) {
+function createOfferListTemplate({offers}) {
   if (offers.length !== 0) {
     return (
       `<section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
-          ${offers.map((offer) => createOfferTemplate(offer, checkedOffers)).join('')}
+          ${offers.map((offer) => createOfferTemplate(offer)).join('')}
         </div>
       </section>`
     );
@@ -80,10 +76,10 @@ function createDestinationTemplate(destination) {
   return '';
 }
 
-function createEditItemTemplate(destinations, eventPoints, offers, selectedOffers, selectedDestination) {
+function createEditItemTemplate(destinations, destination, eventPoint, offers) {
 
-  const {basePrice, dateFrom, dateTo, type, id, offers: checkedOffers} = eventPoints;
-  const {name: destinationName} = destinations[0];
+  const {basePrice, dateFrom, dateTo, type, id} = eventPoint;
+  const {name} = destination;
   return (
     `<li class="trip-events__item">
         <form class="event event--edit" action="#" method="post">
@@ -97,7 +93,7 @@ function createEditItemTemplate(destinations, eventPoints, offers, selectedOffer
               <div class="event__type-list">
                 <fieldset class="event__type-group">
                   <legend class="visually-hidden">Event type</legend>
-                  ${EVENTS_TYPES.map((item) => createEventTypeTemplate(item, type, id)).join('')}
+                  ${createEventTypeTemplate(EVENTS_TYPES, type)}
                 </fieldset>
               </div>
             </div>
@@ -105,7 +101,7 @@ function createEditItemTemplate(destinations, eventPoints, offers, selectedOffer
               <label class="event__label  event__type-output" for="event-destination-${id}">
                 ${type}
               </label>
-              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${destinationName}" list="destination-list-${id}">
+              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${name}" list="destination-list-${id}">
               <datalist id="destination-list-${id}">
                ${destinations.map((item) => `<option value=${item.name}></option>`)}
               </datalist>
@@ -131,35 +127,35 @@ function createEditItemTemplate(destinations, eventPoints, offers, selectedOffer
             </button>
           </header>
           <section class="event__details">
-            ${createOfferListTemplate(selectedOffers, checkedOffers)}
-            ${createDestinationTemplate(selectedDestination)}
+            ${createOfferListTemplate(offers)}
+            ${createDestinationTemplate(destination)}
           </section>
         </form>
       </li>`
   );
 }
 
-export default class EditItemView {
-  constructor({destinations, eventPoints, offers, selectedOffers, selectedDestination}) {
-    this.destinations = destinations;
-    this.eventPoints = eventPoints;
-    this.offers = offers;
-    this.selectedOffers = selectedOffers;
-    this.selectedDestination = selectedDestination;
+export default class EditItemView extends AbstractView{
+  #destinations = null;
+  #destination = null;
+  #eventPoint = null;
+  #offers = null;
+  #onCloseClick = null;
+  #onSaveEdit = null;
+
+  constructor({destinations, destination, eventPoint, offers, onCloseClick, onSaveEdit}) {
+    super();
+    this.#destinations = destinations;
+    this.#destination = destination;
+    this.#eventPoint = eventPoint;
+    this.#offers = offers;
+    this.#onCloseClick = onCloseClick;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onCloseClick);
+    this.#onSaveEdit = onSaveEdit;
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#onSaveEdit);
   }
 
-  getTemplate() {
-    return createEditItemTemplate(this.destinations, this.eventPoints, this.offers, this.selectedOffers, this.selectedDestination);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEditItemTemplate(this.#destinations, this.#destination, this.#eventPoint, this.#offers);
   }
 }

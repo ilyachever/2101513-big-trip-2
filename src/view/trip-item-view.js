@@ -1,20 +1,19 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {DATE_FORMAT} from '../constants.js';
-import {humanizeTaskDueDate, getDifferenceInTime} from '../utils.js';
+import {humanizeTaskDueDate, getDifferenceInTime} from '../utils/events.js';
 
-function createOfferTemplate({title, price}) {
-  return (
+function createOfferTemplate({offers}) {
+  return offers.map(({title, price}) => (
     `<li class="event__offer">
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${price}</span>
     </li>`
-  );
+  )).join('');
 }
 
-function createTripItemTemplate(destination, eventPoints, offersModel) {
-  const {type, basePrice, dateFrom, dateTo, isFavorite,} = eventPoints;
-  const {offers} = offersModel;
+function createTripItemTemplate(destination, eventPoint, offers) {
+  const {type, basePrice, dateFrom, dateTo, isFavorite,} = eventPoint;
   return (
     `<li class="trip-events__item">
         <div class="event">
@@ -36,7 +35,7 @@ function createTripItemTemplate(destination, eventPoints, offersModel) {
           </p>
           <h4 class="visually-hidden">Offers:</h4>
           <ul class="event__selected-offers">
-            ${offers.map((offer) => createOfferTemplate(offer)).join('')}
+            ${createOfferTemplate(offers)}
           </ul>
           <button class="event__favorite-btn ${isFavorite && 'event__favorite-btn--active'}" onclick="this.classList.toggle('event__favorite-btn--active')" type="button">
             <span class="visually-hidden">Add to favorite</span>
@@ -52,26 +51,22 @@ function createTripItemTemplate(destination, eventPoints, offersModel) {
   );
 }
 
-export default class TripItemView {
-  constructor({destination, eventPoints, offersModel}) {
-    this.destination = destination;
-    this.eventPoints = eventPoints;
-    this.offersModel = offersModel;
+export default class TripItemView extends AbstractView {
+  #destination = null;
+  #eventPoint = null;
+  #offers = null;
+  #onEditClick = null;
+
+  constructor({destination, eventPoint, offers, onEditClick}) {
+    super();
+    this.#destination = destination;
+    this.#eventPoint = eventPoint;
+    this.#offers = offers;
+    this.#onEditClick = onEditClick;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onEditClick);
   }
 
-  getTemplate() {
-    return createTripItemTemplate(this.destination, this.eventPoints, this.offersModel);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createTripItemTemplate(this.#destination, this.#eventPoint, this.#offers);
   }
 }
