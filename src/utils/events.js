@@ -14,9 +14,9 @@ dayjs.extend(minMax);
 let randomDate = dayjs().subtract(getRandomNumber(0, DURATIONS.DAY), 'day').toDate();
 
 const getDate = ({next}) => {
-  const daysInterval = getRandomNumber(0, DURATIONS.DAY);
-  const hoursInterval = getRandomNumber(1, DURATIONS.HOUR);
-  const minsInterval = getRandomNumber(0, DURATIONS.MINUTE);
+  const daysInterval = getRandomNumber(1, DURATIONS.DAY);
+  const hoursInterval = getRandomNumber(5, DURATIONS.HOUR);
+  const minsInterval = getRandomNumber(14, DURATIONS.MINUTE);
   if (next) {
     randomDate = dayjs(randomDate)
       .add(minsInterval, 'minute')

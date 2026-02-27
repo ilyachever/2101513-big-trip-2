@@ -38,12 +38,11 @@ export default class PointPresenter {
       destinations: this.#destinationModel.destinations,
       destination: this.#destinationModel.getById(point.destination),
       eventPoint: this.#point,
-      offers: this.#offersModel.getByType(point.type),
+      offers: this.#offersModel.get(),
       onCloseClick: this.#pointCloseEditHandler,
-      onFormSubmit: this.#pointEditSubmitHandler
+      onSaveEdit: this.#pointEditSubmitHandler
     });
-
-    if (prevPointComponent === null || prevEditPointComponent === null) {
+    if (!prevPointComponent || !prevEditPointComponent) {
       render(this.#pointComponent, this.#pointListContainer);
       return;
     }

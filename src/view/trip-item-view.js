@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import {DATE_FORMAT} from '../constants.js';
 import {humanizeTaskDueDate, getDifferenceInTime} from '../utils/events.js';
 
-function createOfferTemplate({offers}) {
+function createOfferTemplate(offers) {
   return offers.map(({title, price}) => (
     `<li class="event__offer">
         <span class="event__offer-title">${title}</span>
@@ -14,6 +14,7 @@ function createOfferTemplate({offers}) {
 
 function createTripItemTemplate(destination, eventPoint, offers) {
   const {type, basePrice, dateFrom, dateTo, isFavorite,} = eventPoint;
+  const eventOffers = offers.filter((offer) => eventPoint.offers.includes(offer.id));
   return (
     `<li class="trip-events__item">
         <div class="event">
@@ -35,7 +36,7 @@ function createTripItemTemplate(destination, eventPoint, offers) {
           </p>
           <h4 class="visually-hidden">Offers:</h4>
           <ul class="event__selected-offers">
-            ${createOfferTemplate(offers)}
+            ${createOfferTemplate(eventOffers)}
           </ul>
           <button class="event__favorite-btn ${isFavorite && 'event__favorite-btn--active'}" onclick="this.classList.toggle('event__favorite-btn--active')" type="button">
             <span class="visually-hidden">Add to favorite</span>
