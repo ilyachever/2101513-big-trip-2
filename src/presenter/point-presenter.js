@@ -1,7 +1,8 @@
 import {render, replace, remove} from '../framework/render.js';
-import {MODE} from '../constants.js';
+import {EDIT_TYPE, MODE, UPDATE_TYPE, USER_ACTION,} from '../constants.js';
 import EditItemView from '../view/edit-item-view.js';
 import TripItemView from '../view/trip-item-view.js';
+import {isMinorChange} from '../utils/common.js';
 
 export default class PointPresenter {
   #pointListContainer = null;
@@ -35,12 +36,13 @@ export default class PointPresenter {
       onFavoriteClick: this.#pointFavoriteHandler
     });
     this.#editPointComponent = new EditItemView({
-      destinations: this.#destinationModel.destinations,
-      destination: this.#destinationModel.getById(point.destination),
+      destinations: this.#destinationModel.get(),
       eventPoint: this.#point,
       offers: this.#offersModel.get(),
+      editorMode: EDIT_TYPE.EDITING,
       onCloseClick: this.#pointCloseEditHandler,
-      onSaveEdit: this.#pointEditSubmitHandler
+      onSaveEdit: this.#pointEditSubmitHandler,
+      onDeleteClick: this.#deleteClickHandler,
     });
     if (!prevPointComponent || !prevEditPointComponent) {
       render(this.#pointComponent, this.#pointListContainer);
@@ -66,9 +68,14 @@ export default class PointPresenter {
 
   resetView() {
     if (this.#mode !== MODE.DEFAULT) {
+      this.#editPointComponent.reset(this.#point);
       this.#replaceFormToPoint();
     }
   }
+
+  #deleteClickHandler = (point) => {
+    this.#handleDataChange(USER_ACTION.DELETE_POINT, UPDATE_TYPE.MINOR, point);
+  };
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
@@ -100,12 +107,20 @@ export default class PointPresenter {
   };
 
   #pointEditSubmitHandler = (point) => {
+    const currentTypeChange = isMinorChange(point, this.#point) ? UPDATE_TYPE.MINOR : UPDATE_TYPE.PATCH;
+    this.#handleDataChange(
+      USER_ACTION.UPDATE_POINT,
+      currentTypeChange,
+      point,
+    );
     this.#replaceFormToPoint();
-    this.#handleDataChange(point);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
   #pointFavoriteHandler = () => {
-    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#handleDataChange(USER_ACTION.UPDATE_POINT, UPDATE_TYPE.PATCH, {
+      ...this.#point,
+      isFavorite: !this.#point.isFavorite
+    });
   };
 }

@@ -1,10 +1,12 @@
 export default class DestinationModel {
   #destinations = [];
+  #service = null;
   constructor(service) {
-    this.#destinations = service.getDestinations();
+    this.#service = service;
+    this.#destinations = this.#service.getDestinations();
   }
 
-  get destinations () {
+  get() {
     return this.#destinations;
   }
 

@@ -1,8 +1,14 @@
-import {DATE_FORMAT, EVENTS_TYPES} from '../constants.js';
+import {DATE_FORMAT, EDIT_TYPE, EVENTS_TYPES, POINT_EMPTY} from '../constants.js';
 import {humanizeTaskDueDate, toUpperCaseFirstSign} from '../utils/events.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+
+function rollUpTemplate() {
+  return `<button class="event__rollup-btn" type="button">
+            <span class="visually-hidden">Open event</span>
+          </button>`;
+}
 
 function createDestinationOptionTemplate(destinations) {
   return destinations.map((destination) => (
@@ -43,7 +49,7 @@ function createOfferListTemplate(offers, checkedOffers) {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
-          ${offers.map((offer) => createOfferTemplate(offer, checkedOffers.includes(offer.id))).join('')}
+          ${offers.map((offer) => createOfferTemplate(offer, checkedOffers?.includes(offer.id))).join('')}
         </div>
       </section>`
     );
@@ -87,11 +93,12 @@ function createDestinationTemplate(destination) {
   return '';
 }
 
-function createEditItemTemplate({state, eventPointDestinations, eventPointOffers}) {
+function createEditItemTemplate({state, eventPointDestinations, eventPointOffers, editorMode}) {
   const {basePrice, dateFrom, dateTo, type, id, destination} = state;
-  const selectedDestination = eventPointDestinations.find((item) => item.id === destination) || eventPointDestinations[0];
+  const isCreating = editorMode === EDIT_TYPE.CREATING;
+  const selectedDestination = eventPointDestinations.find((item) => item.id === destination);
   const currentEventPointOffers = eventPointOffers.find((offer) => offer.type === type);
-  const {name} = selectedDestination;
+  const selectedDestinationName = selectedDestination ? selectedDestination.name : '';
   return (
     `<li class="trip-events__item">
         <form class="event event--edit" action="#" method="post">
@@ -105,7 +112,7 @@ function createEditItemTemplate({state, eventPointDestinations, eventPointOffers
               <div class="event__type-list">
                 <fieldset class="event__type-group">
                   <legend class="visually-hidden">Event type</legend>
-                  ${createEventTypeTemplate(EVENTS_TYPES, type)}
+                  ${type ? createEventTypeTemplate(EVENTS_TYPES, type) : ''}
                 </fieldset>
               </div>
             </div>
@@ -113,17 +120,17 @@ function createEditItemTemplate({state, eventPointDestinations, eventPointOffers
               <label class="event__label  event__type-output" for="event-destination-${id}">
                 ${type}
               </label>
-              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${name}" list="destination-list-${id}">
+              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${selectedDestinationName}" list="destination-list-${id}">
               <datalist id="destination-list-${id}">
                 ${createDestinationOptionTemplate(eventPointDestinations)}
               </datalist>
             </div>
             <div class="event__field-group  event__field-group--time">
               <label class="visually-hidden" for="event-start-time-${id}">From</label>
-              <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${humanizeTaskDueDate(dateFrom, DATE_FORMAT.DAY_MONTH_YEAR)}">
+              <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${isCreating ? '' : humanizeTaskDueDate(dateFrom, DATE_FORMAT.DAY_MONTH_YEAR)}">
               &mdash;
               <label class="visually-hidden" for="event-end-time-${id}">To</label>
-              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${humanizeTaskDueDate(dateTo, DATE_FORMAT.DAY_MONTH_YEAR)}">
+              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${isCreating ? '' : humanizeTaskDueDate(dateTo, DATE_FORMAT.DAY_MONTH_YEAR)}">
             </div>
             <div class="event__field-group  event__field-group--price">
               <label class="event__label" for="event-price-${id}">
@@ -133,14 +140,12 @@ function createEditItemTemplate({state, eventPointDestinations, eventPointOffers
               <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
             </div>
             <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-            <button class="event__reset-btn" type="reset">Delete</button>
-            <button class="event__rollup-btn" type="button">
-              <span class="visually-hidden">Open event</span>
-            </button>
+            <button class="event__reset-btn" type="reset">${isCreating ? 'Cancel' : 'Delete'}</button>
+            ${isCreating ? '' : rollUpTemplate()}
           </header>
           <section class="event__details">
             ${createOfferListTemplate(currentEventPointOffers.offers, state.offers)}
-            ${createDestinationTemplate(selectedDestination)}
+            ${selectedDestination ? createDestinationTemplate(selectedDestination) : ''}
           </section>
         </form>
       </li>`
@@ -150,19 +155,29 @@ function createEditItemTemplate({state, eventPointDestinations, eventPointOffers
 export default class EditItemView extends AbstractStatefulView {
   #destinations = [];
   #offers = [];
-  #destination = null;
   #onCloseClick = null;
   #onSaveEdit = null;
+  #onDeleteCLick = null;
   #datePickerFrom = null;
   #datePickerTo = null;
+  #editorMode = null;
 
-  constructor({destinations, destination, eventPoint, offers, onCloseClick, onSaveEdit}) {
+  constructor({
+    destinations,
+    eventPoint = POINT_EMPTY,
+    offers,
+    onCloseClick,
+    onSaveEdit,
+    onDeleteClick,
+    editorMode = EDIT_TYPE.EDITING
+  }) {
     super();
     this.#destinations = destinations;
-    this.#destination = destination;
     this.#offers = offers;
     this.#onCloseClick = onCloseClick;
+    this.#onDeleteCLick = onDeleteClick;
     this.#onSaveEdit = onSaveEdit;
+    this.#editorMode = editorMode;
     this._setState(EditItemView.parsePointToState(eventPoint));
     this._restoreHandlers();
   }
@@ -172,6 +187,7 @@ export default class EditItemView extends AbstractStatefulView {
       state: this._state,
       eventPointDestinations: this.#destinations,
       eventPointOffers: this.#offers,
+      editorMode: this.#editorMode,
     });
   }
 
@@ -199,13 +215,24 @@ export default class EditItemView extends AbstractStatefulView {
   }
 
   _restoreHandlers = () => {
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onCloseClick);
+    if (this.#editorMode === EDIT_TYPE.EDITING) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onCloseClick);
+      this.element.querySelector('.event__reset-btn')?.addEventListener('click', this.#deleteClickHandler);
+    }
+    if (this.#editorMode === EDIT_TYPE.CREATING) {
+      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onCloseClick);
+    }
     this.element.querySelector('.event.event--edit').addEventListener('submit', this.#saveEditForm);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationOptionHandler);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
     this.element.querySelector('.event__available-offers')?.addEventListener('change', this.#offersChangeHandler);
     this.#setDatepicker();
+  };
+
+  #deleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onDeleteCLick(this._state);
   };
 
   #offersChangeHandler = () => {
