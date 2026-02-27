@@ -82,6 +82,11 @@ const FILTERS_TYPE = {
   PAST: 'past'
 };
 
+const MODE = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
 export {
   START_ID_COUNTER,
   DESCRIPTIONS,
@@ -99,5 +104,6 @@ export {
   FILTERS_TYPE,
   MONTH_COUNT,
   DURATIONS,
-  OFFER_COUNT
+  OFFER_COUNT,
+  MODE
 };

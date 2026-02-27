@@ -2,6 +2,7 @@ function getRandomArrayElement(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+
 function getRandomNumber(number) {
   const randomNumber = Math.floor(Math.random() * number) + 1;
   return Number(randomNumber);
@@ -16,9 +17,12 @@ function incrementCounter(startFrom) {
 
 const getRandomIntFromDuration = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 
+const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
+
 export {
   getRandomArrayElement,
   incrementCounter,
   getRandomNumber,
-  getRandomIntFromDuration
+  getRandomIntFromDuration,
+  updateItem
 };

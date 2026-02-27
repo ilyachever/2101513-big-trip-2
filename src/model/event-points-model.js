@@ -5,7 +5,7 @@ export default class EventPointsModel {
     this.#eventPoints = service.getEventPoints();
   }
 
-  get() {
+  get eventPoints() {
     return this.#eventPoints;
   }
 }

@@ -1,4 +1,4 @@
-import {render, RenderPosition} from '../render';
+import {render, RenderPosition} from '../framework/render.js';
 import HeaderTripInfoView from '../view/header-trip-info-view';
 import ListFilterView from '../view/list-filter-view';
 import {generateFilter} from '../mock/filter.js';
@@ -11,7 +11,7 @@ export default class HeaderPresenter {
   constructor({headerTripInfo, headerListFilter, eventPointsModel}) {
     this.#headerTripInfo = headerTripInfo;
     this.#headerListFilter = headerListFilter;
-    this.#eventPoints = eventPointsModel.get();
+    this.#eventPoints = eventPointsModel.eventPoints;
   }
 
   init() {
