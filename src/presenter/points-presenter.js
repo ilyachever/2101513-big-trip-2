@@ -68,7 +68,9 @@ export default class PointsPresenter {
       return;
     }
 
-    this.#addPointButtonPresenter.enabledButton();
+    if (!this.#isCreating) {
+      this.#addPointButtonPresenter.enabledButton();
+    }
     this.#renderSort();
     this.#renderTripList();
     this.#renderPoints();
@@ -178,6 +180,7 @@ export default class PointsPresenter {
     this.#emptyListComponent = new EmptyEventPointBoard({
       filterType: this.#filtersModel.get(),
     });
+
     render(this.#emptyListComponent, this.#tripContainer);
   }
 

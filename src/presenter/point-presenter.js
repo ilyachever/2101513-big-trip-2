@@ -113,7 +113,7 @@ export default class PointPresenter {
       currentTypeChange,
       point,
     );
-    this.#replaceFormToPoint();
+
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 

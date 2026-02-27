@@ -32,8 +32,10 @@ const filtersPresenter = new FilterPresenter({
 
 const tripInfoPresenter = new TripInfoPresenter({
   container: siteTripMainContainer,
-  headerListFilter: siteFilterContainer,
-  eventPointsModel
+  eventPointsModel,
+  destinationModel,
+  offersModel,
+  headerListFilter: siteFilterContainer
 });
 const addPointButtonPresenter = new AddPointButtonPresenter({
   container: siteTripMainContainer,
