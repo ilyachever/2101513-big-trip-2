@@ -1,4 +1,4 @@
-const EVENTS_TYPES = [
+const EventTypes = [
   'taxi',
   'bus',
   'train',
@@ -9,38 +9,39 @@ const EVENTS_TYPES = [
   'sightseeing',
   'restaurant'
 ];
-const DATE_FORMAT = {
+const DateFormat = {
   MONTH_DAY: 'MMM D',
   HOUR_MINUTE: 'HH:mm',
   DATE_TIME_FORMAT: 'DD/MM/YY HH:mm'
 };
 
-const FILTERS_TYPE = {
+const FilterType = {
   EVERYTHING: 'everything',
   FUTURE: 'future',
   PRESENT: 'present',
   PAST: 'past'
 };
 
-const USER_ACTION = {
+const UserAction = {
   UPDATE_POINT: 'UPDATE_POINT',
   DELETE_POINT: 'DELETE_POINT',
   CREATE_POINT: 'CREATE_POINT',
 };
 
-const UPDATE_TYPE = {
+const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
+  ERROR: 'ERROR',
 };
 
-const MODE = {
+const Mode = {
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
 };
 
-const EDIT_TYPE = {
+const EditType = {
   EDITING: 'EDITING',
   CREATING: 'CREATING',
 };
@@ -52,10 +53,10 @@ const POINT_EMPTY = {
   destination: null,
   isFavorite: false,
   offers: [],
-  type: EVENTS_TYPES[0],
+  type: EventTypes[5],
 };
 
-const SORT_TYPES = {
+const SortType = {
   DAY: 'day',
   EVENT: 'event',
   TIME: 'time',
@@ -63,52 +64,62 @@ const SORT_TYPES = {
   OFFER: 'offer'
 };
 
-const ENABLED_SORT_TYPES = {
-  [SORT_TYPES.DAY]: true,
-  [SORT_TYPES.EVENT]: false,
-  [SORT_TYPES.TIME]: true,
-  [SORT_TYPES.PRICE]: true,
-  [SORT_TYPES.OFFER]: false,
+const EnabledSortType = {
+  [SortType.DAY]: true,
+  [SortType.EVENT]: false,
+  [SortType.TIME]: true,
+  [SortType.PRICE]: true,
+  [SortType.OFFER]: false,
 };
 
-const EMPTY_LIST_MESSAGE = {
+const EmptyListMessage = {
   EVERYTHING: 'Click New Event to create your first point',
   FUTURE: 'There are no future events now',
   PRESENT: 'There are no present events now',
-  PAST: 'There are no past events now'
+  PAST: 'There are no past events now',
+  ERROR: 'Failed to load latest route information'
 };
 
-const METHOD = {
+const Method = {
   GET: 'GET',
   PUT: 'PUT',
   POST: 'POST',
   DELETE: 'DELETE',
 };
 
-const SOURCE_URL = {
+const SourceUrl = {
   POINTS: 'points',
   OFFERS: 'offers',
   DESTINATIONS: 'destinations',
 };
 
-const TIME_LIMIT = {
+const TimeLimit = {
   LOWER_LIMIT: 300,
   UPPER_LIMIT: 1000,
 };
 
+const DESTINATION_ITEMS_COUNT = 3;
+
+const AUTHORIZATION = 'Basic eo0w590ik29889a';
+
+const END_POINT = 'https://22.objects.htmlacademy.pro/big-trip';
+
 export {
-  EVENTS_TYPES,
-  DATE_FORMAT,
-  FILTERS_TYPE,
-  MODE,
-  SORT_TYPES,
-  ENABLED_SORT_TYPES,
-  USER_ACTION,
-  UPDATE_TYPE,
-  EMPTY_LIST_MESSAGE,
-  EDIT_TYPE,
+  EventTypes,
+  DateFormat,
+  FilterType,
+  Mode,
+  SortType,
+  EnabledSortType,
+  UserAction,
+  UpdateType,
+  EmptyListMessage,
+  EditType,
   POINT_EMPTY,
-  METHOD,
-  SOURCE_URL,
-  TIME_LIMIT
+  Method,
+  SourceUrl,
+  TimeLimit,
+  DESTINATION_ITEMS_COUNT,
+  AUTHORIZATION,
+  END_POINT
 };

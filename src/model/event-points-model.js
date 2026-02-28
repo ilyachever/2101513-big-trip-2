@@ -1,6 +1,6 @@
 import Observable from '../framework/observable.js';
 import {adaptToClient, adaptToServer, updateItem} from '../utils/common.js';
-import {UPDATE_TYPE} from '../constants.js';
+import {UpdateType} from '../constants.js';
 
 export default class EventPointsModel extends Observable {
   #service = null;
@@ -18,16 +18,18 @@ export default class EventPointsModel extends Observable {
   async init() {
     try {
       await Promise.all(
-        [this.#destinationModel.init()],
-        this.#offersModel.init()
+        [
+          this.#destinationModel.init(),
+          this.#offersModel.init()
+        ]
       );
       const points = await this.#service.points;
       this.#eventPoints = points.map(adaptToClient);
-      this._notify(UPDATE_TYPE.INIT, {isError: false});
+      this._notify(UpdateType.INIT, {isError: false});
 
     } catch (error) {
       this.#eventPoints = [];
-      this._notify(UPDATE_TYPE.INIT, {isError: true});
+      this._notify(UpdateType.ERROR, {isError: true});
     }
   }
 

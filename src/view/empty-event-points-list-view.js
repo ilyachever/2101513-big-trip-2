@@ -1,25 +1,33 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {EMPTY_LIST_MESSAGE} from '../constants.js';
+import {EmptyListMessage} from '../constants.js';
 
 function createEmptyEventPointBoardTemplate({message}) {
   return (
     `<p class="trip-events__msg">
-      ${ message }
+      ${message}
     </p>`
   );
 }
 
 export default class EmptyEventPointsListView extends AbstractView {
   #filterType = null;
+  #isServerError = null;
 
-  constructor({filterType}) {
+  constructor({filterType, isServerError = null}) {
     super();
     this.#filterType = filterType;
+    this.#isServerError = isServerError;
   }
 
   get template() {
+    if (this.#isServerError) {
+      return createEmptyEventPointBoardTemplate({
+        message: EmptyListMessage['ERROR'],
+      });
+    }
+
     return createEmptyEventPointBoardTemplate({
-      message: EMPTY_LIST_MESSAGE[this.#filterType.toUpperCase()],
+      message: EmptyListMessage[this.#filterType.toUpperCase()],
     });
   }
 }

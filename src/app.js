@@ -7,15 +7,14 @@ import FilterPresenter from './presenter/filter-presenter.js';
 import FilterModel from './model/filter-model.js';
 import AddPointButtonPresenter from './presenter/add-point-button-presenter.js';
 import PointsApiService from './service/points-api-service.js';
+import {END_POINT, AUTHORIZATION} from './constants.js';
 
 const siteTripMainContainer = document.querySelector('.trip-main');
 const siteFilterContainer = document.querySelector('.trip-controls__filters');
 const tripEventsElement = document.querySelector('.trip-events');
 
-const AUTHORIZATION = 'Basic eo0w590ik29889a';
-const END_POINT = 'https://22.objects.htmlacademy.pro/big-trip';
-
 const pointsApiService = new PointsApiService(END_POINT, AUTHORIZATION);
+
 const destinationModel = new DestinationModel(pointsApiService);
 const offersModel = new OffersModel(pointsApiService);
 const eventPointsModel = new EventPointsModel(
@@ -24,6 +23,7 @@ const eventPointsModel = new EventPointsModel(
   offersModel,
 );
 const filtersModel = new FilterModel();
+
 const filtersPresenter = new FilterPresenter({
   filterContainer: siteFilterContainer,
   eventPointsModel,
@@ -32,8 +32,10 @@ const filtersPresenter = new FilterPresenter({
 
 const tripInfoPresenter = new TripInfoPresenter({
   container: siteTripMainContainer,
-  headerListFilter: siteFilterContainer,
-  eventPointsModel
+  eventPointsModel,
+  destinationModel,
+  offersModel,
+  headerListFilter: siteFilterContainer
 });
 const addPointButtonPresenter = new AddPointButtonPresenter({
   container: siteTripMainContainer,
@@ -49,9 +51,9 @@ const pointsPresenter = new PointsPresenter({
 
 export default class BigTripApp {
   init() {
-    addPointButtonPresenter.init({onButtonClick: pointsPresenter.addPointButtonClickHandler});
     tripInfoPresenter.init();
     filtersPresenter.init();
+    addPointButtonPresenter.init({onButtonClick: pointsPresenter.addPointButtonClickHandler});
     pointsPresenter.init();
     eventPointsModel.init();
   }

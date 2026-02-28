@@ -4,26 +4,39 @@ import HeaderTripInfoView from '../view/header-trip-info-view.js';
 export default class TripInfoPresenter {
   #container = null;
   #eventPointsModel = null;
-  #eventPoints = null;
+  #destinationModel = null;
+  #offersModel = null;
   #tripInfoComponent = null;
 
-  constructor({container, eventPointsModel}) {
+  constructor({container, eventPointsModel, destinationModel, offersModel}) {
     this.#container = container;
     this.#eventPointsModel = eventPointsModel;
-    this.#eventPoints = this.#eventPointsModel.get();
+    this.#destinationModel = destinationModel;
+    this.#offersModel = offersModel;
+
+    this.#eventPointsModel.addObserver(this.#modelEventHandler);
   }
 
   init() {
-    const prevTripInfoComponent = this.#tripInfoComponent;
-    this.#tripInfoComponent = new HeaderTripInfoView();
-    if (!prevTripInfoComponent) {
+    const preventTripInfoComponent = this.#tripInfoComponent;
+    this.#tripInfoComponent = new HeaderTripInfoView({
+      destinations: this.#destinationModel.get(),
+      offers: this.#offersModel.get(),
+      eventPoints: this.#eventPointsModel.get(),
+    });
+
+    if (!preventTripInfoComponent) {
       render(this.#tripInfoComponent, this.#container, RenderPosition.AFTERBEGIN);
       return;
     }
 
-    replace(this.#tripInfoComponent, prevTripInfoComponent);
-    remove(prevTripInfoComponent);
+    replace(this.#tripInfoComponent, preventTripInfoComponent);
+    remove(preventTripInfoComponent);
 
-    render(this.#tripInfoComponent, this.#container);
+    render(this.#tripInfoComponent, this.#container, RenderPosition.AFTERBEGIN);
   }
+
+  #modelEventHandler = () => {
+    this.init();
+  };
 }

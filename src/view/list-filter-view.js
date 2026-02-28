@@ -9,11 +9,13 @@ const createFilterTypeTemplate = (filters) => filters.reduce(
     </div>`, ''
 );
 
+
 const createListFilterTemplate = (filters) =>
   `<form class="trip-filters" action="#" method="get">
     ${createFilterTypeTemplate(filters)}
     <button class="visually-hidden" type="submit">Accept filter</button>
   </form>`;
+
 
 export default class ListFilterView extends RadioListView {
 

@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import RadioListView from './radio-list-view.js';
 
 function createSortTypeListTemplate(sort) {
   return sort.map(({type, isDisabled, isChecked}) => (
@@ -27,24 +27,9 @@ function createListSortTemplate(sort) {
   );
 }
 
-export default class ListSortView extends AbstractView {
-  #items = null;
-  #handleItemChange = null;
-
-  constructor({items, onItemChange}) {
-    super();
-    this.#items = items;
-    this.#handleItemChange = onItemChange;
-
-    this.element.addEventListener('change', this.#itemChangeHandler);
-  }
-
-  #itemChangeHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleItemChange?.(evt.target.dataset.item);
-  };
+export default class ListSortView extends RadioListView {
 
   get template() {
-    return createListSortTemplate(this.#items);
+    return createListSortTemplate(this._items);
   }
 }

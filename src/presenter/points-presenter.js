@@ -1,15 +1,14 @@
 import {render, remove} from '../framework/render.js';
-import EmptyEventPointBoard from '../view/empty-event-points-list-view.js';
 import TripListView from '../view/trip-list-view.js';
 import PointPresenter from './point-presenter.js';
-import {FILTERS_TYPE, SORT_TYPES, TIME_LIMIT, UPDATE_TYPE, USER_ACTION} from '../constants.js';
+import {FilterType, SortType, TimeLimit, UpdateType, UserAction} from '../constants.js';
 import SortPresenter from './sort-presenter.js';
 import {sorting} from '../utils/sort.js';
 import {filter} from '../utils/filter.js';
 import AddPointPresenter from './add-point-presenter.js';
 import LoaderView from '../view/loading-view.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
-
+import EmptyEventPointsListView from '../view/empty-event-points-list-view.js';
 export default class PointsPresenter {
   #tripContainer = null;
   #destinationModel = null;
@@ -24,9 +23,9 @@ export default class PointsPresenter {
   #sortPresenter = null;
   #addPointPresenter = null;
   #addPointButtonPresenter = null;
-  #currentSortType = SORT_TYPES.DAY;
+  #currentSortType = SortType.DAY;
   #isCreating = false;
-  #uiBlocker = new UiBlocker({lowerLimit: TIME_LIMIT.LOWER_LIMIT, upperLimit: TIME_LIMIT.UPPER_LIMIT});
+  #uiBlocker = new UiBlocker({lowerLimit: TimeLimit.LOWER_LIMIT, upperLimit: TimeLimit.UPPER_LIMIT});
 
   constructor({tripContainer, destinationModel, eventPointsModel, offersModel, filtersModel, addPointButtonPresenter}) {
     this.#tripContainer = tripContainer;
@@ -34,14 +33,14 @@ export default class PointsPresenter {
     this.#eventPointsModel = eventPointsModel;
     this.#offersModel = offersModel;
     this.#filtersModel = filtersModel;
-    this.#eventPointsModel.addObserver(this.#modelEventHandler);
-    this.#filtersModel.addObserver(this.#modelEventHandler);
+    this.#eventPointsModel.addObserver(this.#modelEventChangeHandler);
+    this.#filtersModel.addObserver(this.#modelEventChangeHandler);
     this.#addPointButtonPresenter = addPointButtonPresenter;
     this.#addPointPresenter = new AddPointPresenter({
       container: this.#tripListComponent.element,
       destinationModel: this.#destinationModel,
       offersModel: this.#offersModel,
-      onDataChange: this.#handleViewAction,
+      onDataChange: this.#viewActionChangeHandler,
       onDestroy: this.#addPointDestroyHandler,
     });
   }
@@ -65,10 +64,14 @@ export default class PointsPresenter {
 
     if (this.points.length === 0 && !this.#isCreating) {
       this.#renderEmptyList();
+      this.#addPointButtonPresenter.enabledButton();
       return;
     }
 
-    this.#addPointButtonPresenter.enabledButton();
+    if (!this.#isCreating) {
+      this.#addPointButtonPresenter.enabledButton();
+    }
+
     this.#renderSort();
     this.#renderTripList();
     this.#renderPoints();
@@ -80,10 +83,12 @@ export default class PointsPresenter {
 
   #clearBoard = ({resetSortType = false} = {}) => {
     this.#clearPoints();
-    this.#sortPresenter.destroy();
+    if (this.#sortPresenter) {
+      this.#sortPresenter.destroy();
+    }
     remove(this.#emptyListComponent);
     if (resetSortType) {
-      this.#currentSortType = SORT_TYPES.DAY;
+      this.#currentSortType = SortType.DAY;
     }
   };
 
@@ -93,29 +98,34 @@ export default class PointsPresenter {
     this.#addPointPresenter.destroy();
   };
 
-  #modelEventHandler = (updateType, data) => {
-    if (updateType === UPDATE_TYPE.PATCH) {
+  #modelEventChangeHandler = (updateType, data) => {
+    if (updateType === UpdateType.PATCH) {
       this.#pointsPresenter.get(data?.id)?.init(data);
     }
-    if (updateType === UPDATE_TYPE.MINOR) {
+    if (updateType === UpdateType.MINOR) {
       this.#clearBoard();
       this.#renderBoard();
     }
-    if (updateType === UPDATE_TYPE.MAJOR) {
+    if (updateType === UpdateType.MAJOR) {
       this.#clearBoard({resetSortType: true});
       this.#renderBoard();
     }
-    if (updateType === UPDATE_TYPE.INIT) {
+    if (updateType === UpdateType.INIT) {
       this.#isLoading = false;
       remove(this.#loadingComponent);
       this.#renderBoard();
     }
+    if (updateType === UpdateType.ERROR) {
+      this.#isLoading = false;
+      remove(this.#loadingComponent);
+      this.#renderErrorMessage();
+    }
   };
 
-  #handleViewAction = async (actionType, updateType, update) => {
+  #viewActionChangeHandler = async (actionType, updateType, update) => {
 
     this.#uiBlocker.block();
-    if (actionType === USER_ACTION.UPDATE_POINT) {
+    if (actionType === UserAction.UPDATE_POINT) {
       this.#pointsPresenter.get(update.id).setSaving();
       try {
         await this.#eventPointsModel.update(updateType, update);
@@ -123,7 +133,7 @@ export default class PointsPresenter {
         this.#pointsPresenter.get(update.id).setAborting();
       }
     }
-    if (actionType === USER_ACTION.CREATE_POINT) {
+    if (actionType === UserAction.CREATE_POINT) {
       this.#addPointPresenter.setSaving();
       try {
         await this.#eventPointsModel.add(updateType, update);
@@ -133,7 +143,7 @@ export default class PointsPresenter {
         this.#addPointPresenter.setAborting();
       }
     }
-    if (actionType === USER_ACTION.DELETE_POINT) {
+    if (actionType === UserAction.DELETE_POINT) {
       this.#pointsPresenter.get(update.id).setRemove();
       try {
         await this.#eventPointsModel.delete(updateType, update);
@@ -174,18 +184,27 @@ export default class PointsPresenter {
     });
   }
 
+  #renderErrorMessage() {
+    this.#emptyListComponent = new EmptyEventPointsListView({
+      filterType: this.#filtersModel.get(),
+      isServerError: true,
+    });
+    render(this.#emptyListComponent, this.#tripContainer);
+  }
+
   #renderEmptyList() {
-    this.#emptyListComponent = new EmptyEventPointBoard({
+    this.#emptyListComponent = new EmptyEventPointsListView({
       filterType: this.#filtersModel.get(),
     });
+
     render(this.#emptyListComponent, this.#tripContainer);
   }
 
   addPointButtonClickHandler = () => {
     this.#isCreating = true;
     this.#addPointButtonPresenter.disabledButton();
-    this.#filtersModel.set(UPDATE_TYPE.MAJOR, FILTERS_TYPE.EVERYTHING);
-    this.#currentSortType = SORT_TYPES.DAY;
+    this.#filtersModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#currentSortType = SortType.DAY;
     this.#addPointPresenter.init();
   };
 
@@ -203,7 +222,7 @@ export default class PointsPresenter {
       pointListContainer: this.#tripListComponent.element,
       destinationModel: this.#destinationModel,
       offersModel: this.#offersModel,
-      onPointChange: this.#handleViewAction,
+      onPointChange: this.#viewActionChangeHandler,
       onModeChange: this.#handleModeChange
     });
 

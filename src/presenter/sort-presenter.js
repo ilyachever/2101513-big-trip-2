@@ -1,34 +1,35 @@
 import {render, replace, remove} from '../framework/render.js';
-import {SORT_TYPES, ENABLED_SORT_TYPES} from '../constants.js';
+import {SortType, EnabledSortType} from '../constants.js';
 import ListSortView from '../view/list-sort-view.js';
 
 export default class SortPresenter {
   #container = null;
   #sortTypes = [];
-  #currentSortType = SORT_TYPES.DAY;
+  #currentSortType = SortType.DAY;
   #sortComponent = null;
   #sortTypesChangeHandler = null;
 
-  constructor({container, sortTypeHandler}) {
+  constructor({container, sortTypeHandler, currentSortType}) {
     this.#container = container;
-    this.#sortTypes = Object.values(SORT_TYPES).map((type) => ({
+    this.#currentSortType = currentSortType || SortType.DAY;
+    this.#sortTypes = Object.values(SortType).map((type) => ({
       type,
       isChecked: type === this.#currentSortType,
-      isDisabled: !ENABLED_SORT_TYPES[type],
+      isDisabled: !EnabledSortType[type],
     }));
     this.#sortTypesChangeHandler = sortTypeHandler;
   }
 
   init() {
-    const prevSortComponent = this.#sortComponent;
+    const preventSortComponent = this.#sortComponent;
 
     this.#sortComponent = new ListSortView({
       items: this.#sortTypes,
       onItemChange: this.#sortTypesChangeHandler,
     });
-    if (prevSortComponent) {
-      replace(this.#sortComponent, prevSortComponent);
-      remove(prevSortComponent);
+    if (preventSortComponent) {
+      replace(this.#sortComponent, preventSortComponent);
+      remove(preventSortComponent);
     } else {
       render(this.#sortComponent, this.#container);
     }
